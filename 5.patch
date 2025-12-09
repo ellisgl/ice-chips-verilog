@@ -1,0 +1,116 @@
+From 54cd5610420e153b30eea87fa6651db3122c033c Mon Sep 17 00:00:00 2001
+From: James Stanley <james@incoherency.co.uk>
+Date: Thu, 21 Jan 2021 19:22:01 +0000
+Subject: [PATCH] Add 74125,74126,74244 buffers
+
+---
+ device-index.md     |  3 +++
+ source-7400/74125.v | 23 +++++++++++++++++++++++
+ source-7400/74126.v | 23 +++++++++++++++++++++++
+ source-7400/74244.v | 23 +++++++++++++++++++++++
+ 4 files changed, 72 insertions(+)
+ create mode 100644 source-7400/74125.v
+ create mode 100644 source-7400/74126.v
+ create mode 100644 source-7400/74244.v
+
+diff --git a/device-index.md b/device-index.md
+index d924049..b36de2f 100644
+--- a/device-index.md
++++ b/device-index.md
+@@ -1,6 +1,9 @@
+ ## Buffers, Inverters
+ [7404](source-7400/7404.v) Hex inverter<br />
+ [7407](source-7400/7407.v) Hex buffer/driver (OC)<br />
++[74125](source-7400/74125.v) Quad bus buffer, negative enable<br />
++[74126](source-7400/74126.v) Quad bus buffer, positive enable<br />
++[74244](source-7400/74244.v) Octal buffer with 3-state output<br />
+ 
+ ## Gates
+ [7400](source-7400/7400.v) Quad 2-input NAND gate<br />
+diff --git a/source-7400/74125.v b/source-7400/74125.v
+new file mode 100644
+index 0000000..4b67835
+--- /dev/null
++++ b/source-7400/74125.v
+@@ -0,0 +1,23 @@
++// Quad bus buffer, negative enable
++
++module ttl_74125 #(parameter BLOCKS = 4, DELAY_RISE = 0, DELAY_FALL = 0)
++(
++  input [BLOCKS-1:0] C,
++  input [BLOCKS-1:0] A,
++  output [BLOCKS-1:0] Y
++);
++
++//------------------------------------------------//
++integer i;
++reg [BLOCKS-1:0] computed;
++
++always @(*)
++begin
++  for (i = 0; i < BLOCKS; i++)
++    computed[i] = C[i] ? 1'bZ : A[i];
++end
++//------------------------------------------------//
++
++assign #(DELAY_RISE, DELAY_FALL) Y = computed;
++
++endmodule
+diff --git a/source-7400/74126.v b/source-7400/74126.v
+new file mode 100644
+index 0000000..a035db1
+--- /dev/null
++++ b/source-7400/74126.v
+@@ -0,0 +1,23 @@
++// Quad bus buffer, positive enable
++
++module ttl_74126 #(parameter BLOCKS = 4, DELAY_RISE = 0, DELAY_FALL = 0)
++(
++  input [BLOCKS-1:0] C,
++  input [BLOCKS-1:0] A,
++  output [BLOCKS-1:0] Y
++);
++
++//------------------------------------------------//
++integer i;
++reg [BLOCKS-1:0] computed;
++
++always @(*)
++begin
++  for (i = 0; i < BLOCKS; i++)
++    computed[i] = C[i] ? A[i] : 1'bZ;
++end
++//------------------------------------------------//
++
++assign #(DELAY_RISE, DELAY_FALL) Y = computed;
++
++endmodule
+diff --git a/source-7400/74244.v b/source-7400/74244.v
+new file mode 100644
+index 0000000..5aaeb65
+--- /dev/null
++++ b/source-7400/74244.v
+@@ -0,0 +1,23 @@
++// Octal buffer with 3-state output
++
++module ttl_74244 #(parameter WIDTH = 8, DELAY_RISE = 0, DELAY_FALL = 0)
++(
++  input [(WIDTH-1)/4:0] G_bar,
++  input [WIDTH-1:0] A,
++  output [WIDTH-1:0] Y
++);
++
++//------------------------------------------------//
++integer i;
++reg [WIDTH-1:0] computed;
++
++always @(*)
++begin
++  for (i = 0; i < WIDTH; i++)
++    computed[i] = G_bar[i/4] ? 1'bZ : A[i];
++end
++//------------------------------------------------//
++
++assign #(DELAY_RISE, DELAY_FALL) Y = computed;
++
++endmodule
